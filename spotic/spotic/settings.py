@@ -33,6 +33,8 @@ ALLOWED_HOSTS = []
 
 MY_APPS = [
     'users.apps.UsersConfig',
+    'songs.apps.SongsConfig',
+    'artists.apps.ArtistsConfig'
 ]
 
 OTHER_APPS = [

@@ -24,6 +24,8 @@ class UserSerializer(serializers.ModelSerializer):
         return cleaned_username
 
     def validate_role(self, value):
+        if value == 'singer':
+            raise serializers.ValidationError('Для создания профиля исполнителя перейдите в создание songer')
         if value == 'admin':
             raise serializers.ValidationError('Вы не можете стать администратором')
         return value
@@ -69,3 +71,22 @@ class UserSerializer(serializers.ModelSerializer):
             'email': instance.email,
         }
                 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+class UpdatePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        request = self.context['request'].user
+        old_password = data.get('old_password')
+        if not user.check_password(old_password):
+            raise serializers.ValidationError({"old_password": "Старый пароль введен неверно."})
+        if old_password == data.get('new_password'):
+            raise serializers.ValidationError(
+                {"new_password": "Новый пароль не может совпадать со старым."}
+            )
+        return data
