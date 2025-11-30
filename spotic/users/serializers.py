@@ -71,7 +71,7 @@ class UserSerializer(serializers.ModelSerializer):
             'email': instance.email,
         }
                 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class UserUpdateDeleteSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email']
@@ -81,7 +81,7 @@ class UpdatePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
 
     def validate(self, data):
-        request = self.context['request'].user
+        user = self.context['request'].user
         old_password = data.get('old_password')
         if not user.check_password(old_password):
             raise serializers.ValidationError({"old_password": "Старый пароль введен неверно."})
@@ -90,3 +90,10 @@ class UpdatePasswordSerializer(serializers.Serializer):
                 {"new_password": "Новый пароль не может совпадать со старым."}
             )
         return data
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        new_password = self.validated_data['new_password']
+        user.set_password(new_password)
+        user.save()
+        return user
